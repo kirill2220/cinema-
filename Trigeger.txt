@@ -1,0 +1,50 @@
+
+CREATE TABLE AUDITT 
+( 
+OperationType nvarchar(100), 
+filmname nvarchar(100), 
+datee date, 
+date datetime, 
+place nvarchar(100), 
+users nvarchar(100) 
+)
+drop table AUDITT
+
+
+CREATE TRIGGER Ticket_BEFORE_INSERT_ROWS
+ON Ticket
+AFTER INSERT 
+AS
+declare @Place int;
+declare @filname nvarchar(100);
+declare @Filmid int;
+declare @date date;
+select @Place=place from Place, Inserted I
+where Place.ID=I.IDPlace;
+select @date=dateSession,@Filmid=IDFilm from Session, Inserted I
+where Session.ID=I.IDSession;
+select @filname=name from Film
+where Film.ID=@Filmid;
+INSERT INTO AUDITT(OperationType,filmname,date,datenow,place,users) SELECT 'Покупка билета',@filname,@date, GetDate(),@Place,  I.IDUsers FROM    Inserted I;
+select * from AUDITT
+CREATE TRIGGER Ticket_BEFORE_DELETE_ROWS
+ON Ticket
+AFTER DELETE 
+AS
+declare @Place int;
+declare @filname nvarchar(100);
+declare @Filmid int;
+declare @date date;
+select @Place=place from Place, Deleted D
+where Place.ID=D.IDPlace;
+select @date=dateSession,@Filmid=IDFilm from Session, Deleted D
+where Session.ID=D.IDSession;
+select @filname=name from Film
+where Film.ID=@Filmid;
+INSERT INTO AUDITT(OperationType,filmname,date,datenow,place,users) SELECT 'Возврат билета',@filname,@date,GetDate(),@Place,  D.IDUsers FROM    Deleted D;
+
+
+drop trigger Ticket_BEFORE_DELETE_ROWS
+select * from Ticket;
+select * from AUDITT;
+select * from Session;

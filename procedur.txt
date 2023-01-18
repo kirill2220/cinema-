@@ -1,0 +1,602 @@
+CREATE procedure ListUsers
+as begin
+select * from Users;
+end;
+go
+---------------------
+iinsert into Users(name,status) values('KiR','Admin') ;
+
+insert into Users values(2,'Gleb',1)
+select * from Post;
+select * from Users;
+
+--1 
+
+
+---------------------------
+CREATE procedure InsertUsers @login nvarchar(50), @password nvarchar(64)
+as begin 
+begin try
+INSERT into Users(login,password) values(@login,@password) ;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+--drop procedure InsertUsers;
+---------------------------------
+CREATE procedure InsertData @login nvarchar(50), @password nvarchar(64),@name nvarchar(50),@email nvarchar(50)
+as begin 
+begin try
+declare @id int;
+select @id=id from Users
+where login=@login and password=@password
+INSERT into data(name,email,IDUsers) values(@name,@email,@id) ;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-------------------------------------------------------
+--drop procedure InsertData;
+
+CREATE procedure ListUsersEmailLogin
+as begin
+select login,email from Users inner join Data 
+on Users.id=Data.IDUsers;
+end;
+go
+ exec ListUsersEmailLogin;
+ -----------------------------------------------
+ CREATE procedure ListUsersPasswordLogin
+as begin
+select users.ID,login,password,name,Users.status from Users inner join Data 
+on Users.id=Data.IDUsers;;
+end;
+go
+ exec ListUsersPasswordLogin;
+ ------------------------------
+CREATE procedure InsertFilm @name nvarchar(50), @year int,@duration  time,@startRelease  date,@endRelease   date,@description  nvarchar(500),@ageLimit int,@Genre nvarchar(50),@img image
+as begin 
+begin try
+declare @checkname nvarchar(50)='';
+select @checkname=name from Genre
+where name=@Genre
+if @checkname=''
+insert into Genre(name) values(@Genre);
+insert into Poster(img,name) values(@img,@name);
+declare @idGenre int,@idPoster int;
+select @idGenre=id from Genre
+where name=@Genre;
+select @idPoster=IdPoster  from Poster
+where name=@name;
+INSERT into Film(name,year ,duration,startRelease,endRelease,description,ageLimit,IDGenre ,img) values(@name,@year,@duration,@startRelease,@endRelease,@description,@ageLimit,@idGenre,@idPoster) ;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+exec InsertFilm 'мафиdя',2000,	'09:31:36', '2020-12-15', '2020-12-25',	'Фильм фильм',18,'werweefgetwg',	''
+---------------------------------------
+select * from film;
+select * from Genre;
+select * from Poster;
+delete film;
+delete Genre;
+delete Poster;
+---------------------------------------------
+select * from Film;
+ CREATE procedure ListFilm
+as begin
+select Film.name,Film.year,Poster.img,Film.ID,Film.endRelease,Film.startRelease from Film inner join Poster 
+on Film.img=Poster.IdPoster;
+end;
+go exec ListFilm;
+------------------------------------------------------------------
+CREATE procedure ListFilmAtFilm @namefilm nvarchar(50)
+as begin
+select Poster.img,startRelease,endRelease,Genre.name,ageLimit,duration,description from Film inner join Poster 
+on Film.img=Poster.IdPoster
+inner join Genre
+on Film.IDGenre=Genre.Id
+where Film.name=@namefilm;
+end;
+go
+exec ListFilmAtFilm 'lawiuegfo'
+drop procedure ListFilmAtFilm
+select * from film;
+----------------------------------------------------------------------------
+
+CREATE procedure ListFilmName 
+as begin
+select id,name from Film 
+where  endRelease>=CAST(GETDATE() AS DATE);
+end;
+-----------------------------------
+
+BEGIN
+    DECLARE @RowCount int = 10,
+            @Index int = 1
+
+    WHILE (@Index <= @RowCount)
+    BEGIN
+        INSERT into Film(name,year ,duration,startRelease,endRelease,description,ageLimit,IDGenre ,img) values('Kirill'+ CAST(@Index AS nvarchar(50)),2002,'12:12','01-01-2022','02-02-2022','asgadsda',11,1,1) ;
+        SET @Index += 1
+    END
+END
+delete film;
+
+--------------------------------------------------------------------------------
+CREATE procedure ListUsersALL
+as begin
+select Users.ID,login,email,name from Users inner join Data 
+on Users.id=Data.IDUsers;
+end;
+go
+----------------------------------
+CREATE procedure DellUser @id int
+as begin
+delete Users where Users.ID=@id;
+end;
+go
+-----------------------------------
+CREATE procedure ListHallName
+as begin
+select name from Hall;
+end;
+go
+-----------------------
+CREATE procedure InsertHall @name nvarchar(50), @coastvip int,@coastnorm int,@seats int,@rows int
+as begin 
+begin try
+declare @id_type_place int=0,@id_hall int;
+select @id_type_place=ID from TypePlace
+where cost_normal=@coastnorm and cost_vip=@coastvip;
+if @id_type_place=0
+begin
+insert into TypePlace(cost_vip,cost_normal) values(@coastvip,@coastnorm);
+select @id_type_place=ID from TypePlace
+where cost_normal=@coastnorm and cost_vip=@coastvip;
+end;
+insert into Hall(name,count_place,count_rows,Id_type_Plase) values(@name,@seats,@rows,@id_type_place);
+select @id_hall=ID from Hall
+where @name=name;
+  DECLARE @RowCount int =@seats*@rows ,
+            @Index int = 1
+
+    WHILE (@Index <= @RowCount)
+    BEGIN
+        INSERT into Place(place,IDHall) values(@Index,@id_hall) ;
+        SET @Index += 1
+    END
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+drop procedure InsertHall;
+exec InsertHall 'звезда',3,4,10,12;
+-------------------------------------------------
+CREATE procedure ListHall
+as begin
+select id,name,count_place,count_rows from Hall 
+end;
+go
+-------------------------------------------------
+CREATE procedure CheckFreeHall @Hall int, @date date
+as begin 
+begin try
+select f.duration,s.timeSession from Session as S inner join Film as F
+on F.ID=S.IDFilm
+where S.dateSession=@date and S.IDHall=@Hall
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+
+
+-----------------------------------------------------
+CREATE procedure CheckDurationFilm @Film int
+as begin 
+begin try
+select duration from Film
+where Id=@Film;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-------------------------------------------------
+CREATE procedure InsertSession @date date, @Hall int, @film int, @times time(7)
+as begin 
+begin try
+insert into Session(dateSession,IDHall,IDFilm,timeSession) values(@date,@Hall,@film,@times)
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-----------------------------------------------
+REATE procedure ListUserAdmin @name nvarchar(50)
+as begin
+select * from Users inner join Data
+on Users.ID=Data.IDUsers
+where data.name=@name;
+
+end;
+go
+drop procedure ListUserAdmin
+----------------------------
+CREATE procedure ListChangePassword @name nvarchar(50)
+as begin 
+begin try
+select password from USERS inner join DATA
+on Data.IDUsers=Users.ID
+where @name=Data.name ;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+
+-------------------------------------------------------------------------
+CREATE procedure ChangePassword @newpassword nvarchar(50),@password nvarchar(50),@name nvarchar(50)
+as begin 
+begin try
+declare @id int;
+select @id=IDUsers from USERS inner join DATA
+on Data.IDUsers=Users.Id
+where @name=Data.name and @password=Users.password ;
+update Users set password=@newpassword where Users.Id=@id; 
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-------------------------------------
+CREATE procedure ListGenre
+as begin
+select * from Genre;
+end;
+go
+--------------------------------
+CREATE procedure ListFilmGenre @GenreId int
+as begin
+select Film.name,Film.year,Poster.img from Film inner join Poster 
+on Film.img=Poster.IdPoster
+where Film.IDGenre=@GenreId;
+end;
+go
+--------------------------------------------
+CREATE procedure InsertFavorite @IdFilm int,@IdUser int
+as begin 
+begin try
+insert into Favorite(IDFilm,IDUsers) values(@IdFilm,@IdUser);
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-----------------------
+CREATE procedure ListFilmFavorite
+as begin
+select * from Favorite inner join Users
+on Users.ID=IDUsers
+inner join Data
+on Users.ID=Data.IDUsers;
+end;
+go
+-------------------------------
+CREATE procedure DeleteFavorite @IdFilm int,@IdUser int
+as begin 
+begin try
+delete Favorite where Favorite.IDFilm=@IdFilm and Favorite.IDUsers=@IdUser
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-------------------
+
+CREATE procedure ListFilmFavoriteAll @userId int
+as begin
+select * from Favorite inner join Users
+on Users.ID=IDUsers
+inner join Data
+on Users.ID=Data.IDUsers
+inner join Film
+on Film.ID=Favorite.IDFilm
+inner join Poster 
+on Film.img=Poster.IdPoster
+where Users.ID=@userId;
+end;
+go
+----------------------------------
+CREATE procedure ListSession @filmname nvarchar(50)
+as begin
+select Session.ID,count_rows,cost_normal,cost_vip,count_place,timeSession,dateSession,Hall.ID[idhall] from Session inner join Film
+on Session.IDFilm=Film.ID
+inner join Hall
+on Session.IDHall=Hall.ID
+inner join TypePlace
+on TypePlace.ID=Hall.Id_type_Plase
+where Film.name=@filmname and Session.status='Active'
+ORDER BY dateSession, timeSession;
+end;
+go------------------------------------------
+CREATE procedure ListTicket @IdSession int
+as begin
+select place from Ticket inner join Place
+on Ticket.IDPlace=Place.Id
+where @IdSession=IDSession
+end;
+go
+---------------------------------
+CREATE procedure insertTicket @numPlase int,@IdHall int,@IdSession int,@IdUser int
+as begin 
+begin try
+declare @IdPlase int;
+select @IdPlase=Id from Place
+where IDHall=@IdHall and Place.place=@numPlase
+insert into Ticket(IDSession,IDPlace,IDUsers) values(@IdSession,@IdPlase,@IdUser) ;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+-----------------------------------------
+ CREATE procedure Search @search nvarchar(50)
+as begin
+select Film.name,Film.year,Poster.img from Film inner join Poster 
+on Film.img=Poster.IdPoster
+where film.name LIKE '%'+@search+'%';
+end;
+go
+--------------------------------------------
+CREATE procedure ListOrderUser @idUser int
+as begin
+select Film.name,Session.dateSession,Session.timeSession,Hall.name[hallname],Ticket.ID,place.place from Ticket inner join Session
+on Ticket.IDSession=Session.ID
+inner join Film
+on Session.IDFilm=Film.ID
+inner join Hall
+on Session.IDHall=Hall.ID
+inner join Place
+on Place.ID=Ticket.IDPlace
+where IDUsers=@idUser and Session.status='Active'
+ORDER BY dateSession, timeSession;
+end;
+go
+drop procedure ListOrderUser
+--------------------------------------------
+CREATE procedure DellOrder @id int
+as begin
+delete Ticket where Ticket.ID=@id;
+end;
+go
+-----------------------
+
+CREATE procedure DellFilm @idFilm int
+as begin
+delete Film where ID=@idFilm
+end;
+go
+------------------------------
+ CREATE procedure ListCountTicket @idFilm int
+as begin
+select count(*)[ticket] from Ticket
+inner join Session
+on Ticket.IDSession=Session.ID
+where IDFilm=@idFilm;
+end;
+go
+-------------------------------
+CREATE procedure [dbo].[ChangeUserInfo]  @name nvarchar(50),@login nvarchar(50), @email nvarchar(50), @StartName nvarchar(50)
+as begin 
+begin try
+declare @id int;
+select @id=Users.ID from users inner join Data
+on Data.IDUsers=Users.ID
+where name=@StartName;
+update data set name=@name, email=@email where name=@StartName   ;
+update users set login=@login where ID=@id
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+GO
+----------------------------------
+ CREATE procedure ListUserAtFilm @idSession int
+as begin
+select Session.ID[sessionid], place,Users.login, Data.name,Ticket.ID from Ticket inner join Session
+on Ticket.IDSession=Session.ID
+inner join Film
+on Session.IDFilm=Film.ID
+inner join Hall
+on Session.IDHall=Hall.ID
+inner join Place
+on Place.ID=Ticket.IDPlace
+inner join USERS
+on Ticket.IDUsers=Users.ID
+inner join Data
+on Data.IDUsers=Users.ID
+where Session.ID=@idSession
+order by place asc ;
+end;
+go
+---------------------------------
+CREATE procedure ListFilmNamedate 
+as begin
+select id,name,year from Film 
+end;
+--------------------------------------
+CREATE procedure ListHistory
+as begin
+select * from AUDITT inner join Users
+on AUDITT.users=Users.ID
+inner join Data
+on Data.IDUsers=Users.ID
+order by date DESC
+end;
+go
+drop procedure ListHistory
+--------------------
+CREATE procedure CheckSession 
+as begin
+
+declare sessioncheck cursor for select Session.ID from Session where Session.dateSession<CAST(GETDATE() AS DATE) or (Session.dateSession=CAST(GETDATE() AS DATE) and Session.timeSession<=CAST(GETDATE() AS TIME)); 
+declare @IdSession int;
+open sessioncheck;  
+	fetch sessioncheck into @IdSession;   
+	while @@fetch_status = 0                                  
+    begin 
+		update Session set Session.status='Disactive' where Session.ID=@IdSession
+		fetch  sessioncheck into @IdSession; 
+    end;   
+	;        
+close sessioncheck;
+deallocate sessioncheck--чистит курсоры
+end;
+go
+drop procedure CheckSession
+------------------------
+ CREATE procedure ListCheckSes @filmID int
+as begin
+select Film.endRelease,Film.startRelease from Film inner join Poster 
+on Film.img=Poster.IdPoster
+where Film.ID =@filmID;
+end;
+go
+-------------------
+create view USerData 
+as select 
+Users.login,
+Users.password,
+Users.status,
+Data.name,
+Data.email
+from Users inner join Data
+on Users.ID=Data.IDUsers;
+----
+create view TicketAll 
+as select 
+*
+from Ticket inner join Session
+on Ticket.IDSession=Session.ID
+inner join Film
+on Session.IDFilm=Film.ID
+inner join Hall
+on Session.IDHall=Hall.ID
+inner join Place
+on Place.ID=Ticket.IDPlace
+inner join USERS
+on Ticket.IDUsers=Users.ID
+inner join Data
+on Data.IDUsers=Users.ID
+----

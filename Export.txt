@@ -1,0 +1,34 @@
+go
+create procedure ExportHallToXML
+as
+begin
+--create XML
+select * from Hall
+for xml path('Halls'), root('Hall')
+
+EXEC sp_configure 'show advanced options', 1
+-- To update the currently configured value for advanced options.
+RECONFIGURE WITH OVERRIDE
+
+-- To enable the feature.
+
+EXEC sp_configure 'xp_cmdshell', 1
+
+-- To update the currently configured value for this feature.
+RECONFIGURE WITH OVERRIDE
+
+--save created XML to file
+DECLARE @fileName varchar(100)
+DECLARE @sqlstr varchar(1000)
+DECLARE @sqlCmd varchar(1000)
+
+SET @fileName = 'C:\Hall.xml'
+
+SET @sqlstr = 'Use kursach; select * from Hall for xml path(''Halls''), root(''Hall'') '
+SET @sqlcmd = 'bcp "' + @sqlstr + '" queryout ' + @filename + ' -w -T'
+
+EXEC xp_cmdshell @sqlcmd;
+
+end
+drop procedure ExportHallToXML
+exec ExportHallToXML

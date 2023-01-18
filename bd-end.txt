@@ -1,0 +1,150 @@
+-- drop table Favorite;
+--drop table Ticket;
+--drop table  Data;
+--drop table Place;
+--drop table Session;
+--drop table Users;
+--drop table Hall;
+--drop table Film;
+--drop table Genre;
+--drop table Poster;
+--drop table TypePlace;
+--drop table AUDITT;
+
+
+
+
+--table Users
+create table Users
+(
+ID int identity(1,1)   PRIMARY KEY,
+login nvarchar(50),--логин
+password nvarchar(50),--пароль
+status nvarchar(50) DEFAULT 'User',--статус
+)
+create table Data
+(
+ID int identity(1,1)  PRIMARY KEY,
+name nvarchar(50) not null,-- имя
+email nvarchar(50) not null,-- эмаил
+IDUsers int not null,--идентификатор доступпа
+foreign key (IDUsers )
+  references Users(ID) on delete cascade
+);
+
+--table TypePlace
+create table TypePlace
+(
+ID int  identity(1,1) PRIMARY KEY,
+cost_vip int not null,--тип
+cost_normal int not null--стоимость
+);
+
+
+
+--table HAll
+create Table Hall
+(
+ID int  identity(1,1) PRIMARY KEY,
+name nvarchar(50) not null,
+count_rows int not null,--зал
+count_place int not null,--зал
+Id_type_Plase int not null,
+foreign key (Id_type_Plase)
+  references TypePlace(ID) on delete cascade
+);
+
+--table Place
+create table Place
+(
+ID int  identity(1,1) PRIMARY KEY,
+place int not null,--номер места
+IDHall int not null,--зал
+foreign key (IDHall)
+  references Hall(ID) on delete cascade,
+);
+
+--table Genre
+create table Genre
+(
+ID int  identity(1,1) PRIMARY KEY,
+name nvarchar(50)not null--жанр
+);
+
+create table Poster
+(
+IdPoster int identity(1,1) PRIMARY KEY,
+name nvarchar(50) not null,
+img image,
+);
+
+
+--table Film
+create table Film
+(
+ID int identity(1,1)   PRIMARY KEY,
+name nvarchar(50) not null,--название
+year int not null,--год выпуска
+duration TIME not null,--продолжительность
+startRelease date not null,--дата начала проката
+endRelease date not null,-- дата окончания проката
+description nvarchar(500) not null,-- описание
+ageLimit int not null,--возрастное ограничение
+IDGenre int not null,--жанр
+foreign key (IDGenre)
+  references Genre(ID) ,
+img int not null ,--постер
+foreign key(img)
+references Poster(IdPoster) on delete cascade,
+);
+
+
+
+--table Session
+create table Session
+(
+ID int  identity(1,1) PRIMARY KEY,
+dateSession date not null,--дата сеанса
+timeSession time(7) not null,--время сеанса
+IDHall int not null,--зал
+foreign key (IDHall)
+  references Hall(ID) on delete cascade,
+IDFilm int not null,--фильм
+foreign key (IDFilm)
+  references Film(ID) on delete cascade,
+  status nvarchar(10)  DEFAULT 'Active',
+);
+
+--table Ticket
+create table Ticket
+(
+ID int  identity(1,1) PRIMARY KEY,
+IDSession int not null,--иддентификатор сеаанса
+foreign key (IDSession)
+  references Session(ID) on delete cascade,
+IDPlace int not null,--иентификатор места
+foreign key (IDPlace)
+  references Place(ID) on delete no action,
+  IDUsers int not null,--идентификатор пользователя
+foreign key (IDUsers)
+  references Users(ID) on delete cascade
+ );
+create table Favorite
+(
+ID int  identity(1,1) PRIMARY KEY,
+IDUsers int not null,--идентификатор пользователя
+foreign key (IDUsers)
+  references Users(ID) on delete cascade,
+IDFilm int not null,--фильм
+foreign key (IDFilm)
+  references Film(ID) on delete cascade
+);
+CREATE TABLE AUDITT 
+( 
+OperationType nvarchar(100), 
+filmname nvarchar(100), 
+date date, 
+datenow datetime, 
+place nvarchar(100), 
+users nvarchar(100) 
+)

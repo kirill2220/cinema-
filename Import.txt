@@ -1,0 +1,54 @@
+go
+create procedure ImportHalltromXML
+as
+begin
+insert into Hall(name,count_place,count_rows,Id_type_Plase)
+select
+thXML.Hall .query('name').value('.', 'varchar(50)'),
+thXML.Hall .query('count_place').value('.', 'int'),
+thXML.Hall .query('count_rows').value('.', 'int'),
+thXML.Hall .query('Id_type_Plase').value('.', 'int')
+from (select cast(thXML as xml)
+from openrowset (bulk 'C:\Hall.xml', single_blob) as T(thXML)) as T(thXML)
+cross apply thXML.nodes('Hall/Halls') as thXML (Hall);
+
+end;
+exec ImportHalltromXML
+---------------------------------
+USE [master]
+GO
+
+/****** Object:  StoredProcedure [dbo].[BackupDB]    Script Date: 20.12.2022 13:42:45 ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+Create Procedure [dbo].[BackupDB]
+AS
+Begin
+--Backup to course project folder
+Backup database kursach
+to disk = 'D:\kursach.bak' with init, skip;
+
+select * from Users;
+End;
+GO
+----------------------------------
+use master;
+go
+
+Create Procedure RestoreDB
+as
+
+Begin
+
+restore database kursach
+
+from disk = 'D:\kursach.bak'
+with replace;
+
+End;
+go
+drop procedure RestoreDB

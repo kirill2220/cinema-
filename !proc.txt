@@ -1,0 +1,31 @@
+CREATE procedure InsertImg @img nvarchar(500)
+as begin 
+begin try
+declare @sql nvarchar(max);
+set @sql='INSERT INTO ing (img) 
+SELECT BulkColumn 
+FROM Openrowset( Bulk $img, Single_Blob) as image';
+set @sql = replace(@sql, '$img',  '''' + @img  + ''''  );
+ exec sp_executesql @sql;
+return 1;
+end try
+begin catch
+print 'Номер ошибки: ' + cast(error_number() as varchar(10));
+print 'Сообщение: ' + error_message();
+print 'Уровень: ' + cast(error_severity() as varchar(10));
+print 'Метка: ' + cast(error_state() as varchar(10));
+print 'Номер строки: ' + cast(error_line() as varchar(10));
+if error_procedure() is not null   
+print 'Имя процедуры: ' + error_procedure();
+return -1;
+end catch;
+end;
+
+exec InsertImg "C:\Users\Kirill\Downloads\senokosnoye_ugodye.jpg";
+drop procedure InsertImg;
+exec InsertImg 'C:\Users\Kirill\Downloads\senokosnoye_ugodye.jpg'
+
+
+
+//$conn = odbc_connect( "Driver={SQL Server};Server=KIR\SQLEXPRESS;Database=kurs;", 'KiR', 'Barabull17' );
+

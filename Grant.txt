@@ -1,0 +1,27 @@
+GRANT exec ON Search TO klient;
+GRANT exec ON ListFilmFavoriteAll TO klient;
+GRANT exec ON ListGenre TO klient;
+GRANT exec ON ListFilmGenre TO klient;
+GRANT exec ON ListUserAdmin TO klient;
+GRANT exec ON ListOrderUser TO klient;
+GRANT exec ON ListFilmAtFilm TO klient;
+GRANT exec ON ListFilmFavorite TO klient;
+GRANT exec ON ListSession TO klient;
+GRANT exec ON ListTicket TO klient;
+GRANT exec ON ListFilm TO klient;
+GRANT exec ON ChangePassword TO klient;
+GRANT exec ON ListChangePassword TO klient;
+GRANT exec ON ListUsersEmailLogin TO klient;
+
+GRANT exec ON ChangeUserInfo TO klient;
+GRANT exec ON DellOrder TO klient;
+GRANT exec ON DeleteFavorite TO klient;
+GRANT exec ON InsertFavorite TO klient;
+GRANT exec ON insertTicket TO klient;
+GRANT exec ON CheckSession TO klient;
+create Index Film_index on Film(name);
+create Index Hall_index on Hall(name);
+create Index Favorite_index on Favorite(IDUsers);
+create Index Favorite_index_film on Favorite(IDFilm);
+create Index Place_index on Place(place);
+create Index Place_index_hall on Place(IDHall);
